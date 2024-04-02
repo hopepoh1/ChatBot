@@ -1,37 +1,34 @@
 # Q&A Chatbot
-from langchain_community.llms import OpenAI
-
-#from dotenv import load_dotenv
-
-#load_dotenv()  # take environment variables from .env.
-
-import streamlit as st
 import os
+from openai import Client
+import streamlit as st
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 
-## Function to load OpenAI model and get respones
+# Initialize OpenAI client with your API key
+client = Client(api_key=os.getenv("OPENAI_API_KEY"))
 
+## Function to load OpenAI model and get responses
 def get_openai_response(question):
-    llm=OpenAI(model_name="gpt-3.5-turbo",temperature=0.5)
-    response=llm(question)
-    return response
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "system", "content": question}],
+        max_tokens=50
+    )
+    return response.choices[0].message.content.strip()
 
-##initialize our streamlit app
-
+## Initialize our streamlit app
 st.set_page_config(page_title="Q&A Demo")
-
 st.header("Langchain Application")
 
-input=st.text_input("Input: ",key="input")
-response=get_openai_response(input)
+input_text = st.text_input("Input: ")
 
-submit=st.button("Ask the question")
+submit_button = st.button("Ask the question")
 
 ## If ask button is clicked
-
-if submit:
+if submit_button:
+    response = get_openai_response(input_text)
     st.subheader("The Response is")
     st.write(response)
-
-
-
